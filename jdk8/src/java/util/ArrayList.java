@@ -129,6 +129,7 @@ public class ArrayList<E> extends AbstractList<E>
 
 
     public ArrayList() {
+        //延迟初始化
         this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
     }
 
@@ -332,6 +333,7 @@ public class ArrayList<E> extends AbstractList<E>
 
 
     public boolean add(E e) {
+
         ensureCapacityInternal(size + 1);  // Increments modCount!!
         elementData[size++] = e;
         return true;
