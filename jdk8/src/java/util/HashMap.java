@@ -572,23 +572,30 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         threshold = newThr;
         @SuppressWarnings({"rawtypes","unchecked"})
         Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];
+        //table指向新建的节点数组
         table = newTab;
         if (oldTab != null) {
+            //旧节点迁移到newTable中
             for (int j = 0; j < oldCap; ++j) {
                 Node<K,V> e;
                 if ((e = oldTab[j]) != null) {
                     oldTab[j] = null;
-                    if (e.next == null)
-                        newTab[e.hash & (newCap - 1)] = e;
-                    else if (e instanceof TreeNode)
+                    if (e.next == null) //1.数组节点迁移
+                        newTab[e.hash & (newCap - 1)] = e;  //计算新table的桶索引
+                    else if (e instanceof TreeNode) //2.树节点迁移
                         ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
-                    else { // preserve order
-                        Node<K,V> loHead = null, loTail = null;
-                        Node<K,V> hiHead = null, hiTail = null;
+                    else {  //3.链表节点迁移
+                        // preserve order,维持原顺序(尾插法插入，此处则从前向后遍历)
+                        Node<K,V> loHead = null, loTail = null; //low
+                        Node<K,V> hiHead = null, hiTail = null; //high
                         Node<K,V> next;
                         do {
                             next = e.next;
+                            //oldCap为2^n,表达式是计算e.hash的第n为0或1
+                            //第n位为0则新索引仍在原位，为1新索引为：当前索引+oldCap
+                            //（因为newCap=2*oldCap,hash&(cap-1)相对于旧索引变化取决于第n位）
                             if ((e.hash & oldCap) == 0) {
+                                //low
                                 if (loTail == null)
                                     loHead = e;
                                 else
@@ -596,6 +603,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
                                 loTail = e;
                             }
                             else {
+                                //high
                                 if (hiTail == null)
                                     hiHead = e;
                                 else
@@ -605,11 +613,11 @@ public class HashMap<K,V> extends AbstractMap<K,V>
                         } while ((e = next) != null);
                         if (loTail != null) {
                             loTail.next = null;
-                            newTab[j] = loHead;
+                            newTab[j] = loHead; //索引位置不变
                         }
                         if (hiTail != null) {
                             hiTail.next = null;
-                            newTab[j + oldCap] = hiHead;
+                            newTab[j + oldCap] = hiHead;    //+oldCap,高效替代hash&(newCap-1)
                         }
                     }
                 }
