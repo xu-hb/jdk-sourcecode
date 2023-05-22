@@ -490,6 +490,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         if ((tab = table) == null || (n = tab.length) == 0)
             n = (tab = resize()).length;
 
+        //indexFor:(n - 1) & hash
         if ((p = tab[i = (n - 1) & hash]) == null)
             //第一个元素
             tab[i] = newNode(hash, key, value, null);
